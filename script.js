@@ -3401,3 +3401,62 @@ renderVariantMenu = function(category) {
 };
 renderTypeMenu(currentCategory);
 drawAvatar();
+
+                        
+
+// Keep the classic block avatar only: remove the old round hair pieces and fit all wearables to its square head.
+const drawBlockyAvatar = drawAvatar;
+drawAvatar = function () {
+    drawBlockyAvatar();
+    const model = avatar.querySelector(".rbx-model");
+    if (!model) return;
+    model.querySelectorAll('[class*="hair-"], [class*="cap-"], [class*="beanie"], [class*="glasses"], [class*="headphone"]').forEach(part => part.remove());
+    const hairStyle = options.hair[selected.hair.type].style;
+    const hair = options.hair[selected.hair.type].variants[selected.hair.variant].color;
+    const part = (name, x, y, z, w, h, d, color) => rbxPart("rbx-" + name, x, y, z, w, h, d, color);
+
+    if (hairStyle !== "bald") {
+        // A squared crown follows the head footprint; short angular locks replace the floating bead-like tufts.
+        model.insertAdjacentHTML("beforeend",
+            part("hair-crown", 0, -165, 0, 65, 18, 56, hair) +
+            part("hair-fringe", 0, -153, 30, 46, 12, 4, shadeColor(hair, -9)) +
+            part("hair-lock", -29, -132, 0, 9, 30, 52, hair) +
+            part("hair-lock", 29, -132, 0, 9, 30, 52, shadeColor(hair, -10)) +
+            (hairStyle === "messy" || hairStyle === "fluffy" ?
+                part("hair-tuft", -17, -176, -3, 17, 10, 17, shadeColor(hair, 12)) +
+                part("hair-tuft", 2, -179, 1, 18, 12, 17, hair) +
+                part("hair-tuft", 18, -174, -2, 15, 9, 16, shadeColor(hair, -7)) : ""));
+    }
+
+    const item = options.accessories[selected.accessories.type].variants[selected.accessories.variant];
+    const style = options.accessories[selected.accessories.type].style;
+    const color = item.color || "#30343b";
+    const dark = shadeColor(color, -20);
+    let wearable = "";
+    if (style === "cap" || style === "backwardCap") {
+        wearable = part("cap-crown", 0, -169, 0, 62, 15, 54, color) +
+            part("cap-brim", 0, -159, style === "backwardCap" ? -27 : 27, 70, 5, 18, dark) +
+            part("cap-seam", 0, -164, 28, 2, 4, 2, shadeColor(color, 25));
+    } else if (style === "beanie") {
+        wearable = part("beanie-crown", 0, -168, 0, 64, 22, 56, color) +
+            part("beanie-cuff", 0, -154, 0, 67, 7, 59, dark) +
+            part("beanie-top", 0, -181, 0, 15, 5, 15, shadeColor(color, 14));
+    } else if (style === "glasses") {
+        [-15, 15].forEach(x => {
+            wearable += part("glasses-lens", x, -130, 32, 16, 12, 2, shadeColor(color, 35));
+            wearable += part("glasses-frame", x, -138, 33, 20, 3, 3, color) + part("glasses-frame", x, -122, 33, 20, 3, 3, color) +
+                part("glasses-frame", x - 9, -130, 33, 3, 18, 3, color) + part("glasses-frame", x + 9, -130, 33, 3, 18, 3, color);
+        });
+        wearable += part("glasses-bridge", 0, -130, 34, 12, 3, 3, color) + part("glasses-arm", -31, -130, 0, 4, 4, 52, dark) + part("glasses-arm", 31, -130, 0, 4, 4, 52, dark);
+    } else if (style === "headphones") {
+        [-1, 1].forEach(side => {
+            wearable += part("headphone-cup", side * 35, -128, 0, 13, 27, 28, color) +
+                part("headphone-pad", side * 35, -128, 15, 5, 19, 3, dark);
+        });
+        [-22, -11, 0, 11, 22].forEach((x, i) => {
+            wearable += part("headphone-band", x, -161 + Math.abs(x) * .18, -1, 8, 7, 17, i === 2 ? shadeColor(color, 15) : color);
+        });
+    }
+    if (wearable) model.insertAdjacentHTML("beforeend", wearable);
+};
+drawAvatar();
