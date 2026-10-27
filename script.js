@@ -3151,7 +3151,7 @@ drawAvatar = function () {
     drawAvatarWithSelectedHair();
     const hairType = options.hair[selected.hair.type];
     const hairVariant = hairType.variants[selected.hair.variant];
-    if (!['messy', 'fluffy', 'curly'].includes(hairVariant.style)) return;
+    if (!['messy', 'fluffy', 'curly'].includes(hairVariant.style) || true) return;
     const model = avatar.querySelector('.rbx-model');
     if (!model) return;
     model.querySelectorAll('.rbx-hair-cap, .rbx-hair-fringe, .rbx-hair-lock, .rbx-hair-tuft').forEach(part => part.remove());
