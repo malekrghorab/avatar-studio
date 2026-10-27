@@ -3219,3 +3219,58 @@ const renderCapFitChoices = renderCapStyleMenu;
 renderCapStyleMenu = function (category, capIndex) { renderCapFitChoices(category, capIndex); itemsContainer.querySelectorAll('.item-button:not(:first-child) span').forEach(label => { label.textContent += ' · ' + bodyShapeNames[activeBodyShape] + ' fit'; }); };
 renderTypeMenu(currentCategory);
 drawAvatar();
+
+
+// Replace the humanoid's box faces with layered ellipsoid volumes.
+const drawAvatarWithTrueHumanoidVolumes = drawAvatar;
+drawAvatar = function () {
+    drawAvatarWithTrueHumanoidVolumes();
+    if (activeBodyShape !== 'humanoid') return;
+    const model = avatar.querySelector('.rbx-model');
+    if (!model) return;
+    model.querySelectorAll('.rbx-torso,.rbx-hips,.rbx-leg,.rbx-arm,.rbx-sleeve,.rbx-hand,.rbx-finger,.rbx-thumb,.rbx-neck,.rbx-shoe,.rbx-sole,.rbx-toe,.rbx-calf,.rbx-shorts,.rbx-boot-cuff').forEach(part => part.remove());
+    const skin = options.body[selected.body.type].variants[selected.body.variant].color;
+    const topType = options.tops[selected.tops.type];
+    const top = topType.variants[selected.tops.variant].color;
+    const bottomType = options.bottoms[selected.bottoms.type];
+    const bottomVariant = bottomType.variants[selected.bottoms.variant];
+    const shoeType = options.shoes[selected.shoes.type];
+    const shoeVariant = shoeType.variants[selected.shoes.variant];
+    const shoe = shoeVariant.color;
+    const accent = shoeVariant.accent || shadeColor(shoe, 24);
+    const leg = bottomType.style === 'shorts' ? skin : bottomVariant.color || skin;
+    const makeVolume = (name,x,y,z,w,h,d,color) => {
+        const layers=[];
+        for(let i=0;i<11;i++){
+            const t=(i/10)*2-1;
+            const scale=Math.sqrt(Math.max(.035,1-t*t));
+            const width=Math.max(4,w*scale),height=Math.max(4,h*scale);
+            layers.push('<i class="rbx-organic-slice" style="position:absolute;left:0;top:0;width:'+width+'px;height:'+height+'px;border-radius:50%;border:1px solid '+shadeColor(color,-18)+';transform:translate3d(-50%,-50%,'+(t*d/2).toFixed(1)+'px);background:radial-gradient(ellipse at 32% 24%,'+shadeColor(color,32)+','+color+' 52%,'+shadeColor(color,-26)+');box-shadow:inset 0 2px 5px rgba(255,255,255,.18)"></i>');
+        }
+        return '<div class="rbx-organic-volume rbx-organic-'+name+'" style="position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;transform:translate3d('+x+'px,'+y+'px,'+z+'px)">'+layers.join('')+'</div>';
+    };
+    const parts=[];
+    const add=(...args)=>parts.push(makeVolume(...args));
+    const shorts=bottomType.style==='shorts';
+    [-18,18].forEach(x=>{
+        add('leg',x,shorts?65:65,0,27,82,30,leg);
+        if(shorts) add('calf',x,94,0,23,31,27,skin);
+        add('sole',x,127,3,36,5,45,accent);
+        add('shoe',x,111,3,36,23,42,shoe);
+        add('toe',x,110,23,27,11,9,accent);
+    });
+    add('hips',0,10,0,60,27,34,bottomVariant.color||skin);
+    if(shorts) add('shorts',0,26,0,64,32,38,bottomVariant.color||skin);
+    const longSleeves=topType.style!=='shirt';
+    [-1,1].forEach(side=>{
+        add('arm',side*49,-18,0,21,67,26,longSleeves?top:skin);
+        if(!longSleeves) add('sleeve',side*49,-53,0,25,27,30,top);
+        add('hand',side*49,20,2,18,19,21,skin);
+        [-6,-2,2,6].forEach((offset,index)=>add('finger',side*49+offset,31+(index===0||index===3?2:0),8,4,10,7,skin));
+        add('thumb',side*58,22,8,6,11,8,skin);
+    });
+    add('torso',0,-40,0,64,82,36,top);
+    add('neck',0,-91,0,18,20,20,skin);
+    model.insertAdjacentHTML('beforeend',parts.join(''));
+};
+drawAvatar();
