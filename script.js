@@ -3274,3 +3274,55 @@ drawAvatar = function () {
     model.insertAdjacentHTML('beforeend',parts.join(''));
 };
 drawAvatar();
+
+// Smooth, continuous humanoid silhouette: replace the slice-built volumes with shaded anatomical forms.
+const drawAvatarWithSmoothHumanoid = drawAvatar;
+drawAvatar = function () {
+    drawAvatarWithSmoothHumanoid();
+    if (activeBodyShape !== 'humanoid') return;
+    const model = avatar.querySelector('.rbx-model');
+    if (!model) return;
+    model.querySelectorAll('.rbx-organic-volume').forEach(part => part.remove());
+    const skin = options.body[selected.body.type].variants[selected.body.variant].color;
+    const topType = options.tops[selected.tops.type];
+    const top = topType.variants[selected.tops.variant].color;
+    const bottomType = options.bottoms[selected.bottoms.type];
+    const bottom = bottomType.variants[selected.bottoms.variant];
+    const shoeVariant = options.shoes[selected.shoes.type].variants[selected.shoes.variant];
+    const shoe = shoeVariant.color;
+    const accent = shoeVariant.accent || shadeColor(shoe, 24);
+    const smoothPart = (name,x,y,z,w,h,d,color,radius) => {
+        const form = document.createElement('div');
+        form.className = 'rbx-organic-volume rbx-organic-' + name;
+        Object.assign(form.style, {
+            position:'absolute', left:'50%', top:'50%', width:w+'px', height:h+'px',
+            transform:'translate3d('+x+'px,'+y+'px,'+z+'px) translate(-50%,-50%)',
+            transformStyle:'preserve-3d', borderRadius:radius || '50%',
+            background:'radial-gradient(ellipse at 32% 24%,'+shadeColor(color,36)+' 0%, '+color+' 53%, '+shadeColor(color,-30)+' 100%)',
+            border:'1px solid '+shadeColor(color,-18),
+            boxShadow:'inset -7px -8px 13px rgba(0,0,0,.16), inset 5px 5px 10px rgba(255,255,255,.26), 0 2px 4px rgba(22,34,53,.10)'
+        });
+        form.style.setProperty('--depth',d+'px');
+        model.appendChild(form);
+    };
+    const legColor = bottomType.style === 'shorts' ? skin : (bottom.color || skin);
+    // Waist, torso and neck overlap slightly so the outline reads as one body.
+    smoothPart('hips',0,13,0,58,28,34,bottom.color||skin,'45% 45% 42% 42%');
+    if (bottomType.style === 'shorts') smoothPart('shorts',0,25,0,62,31,36,bottom.color||skin,'35% 35% 24% 24%');
+    smoothPart('torso',0,-40,0,62,84,36,top,'38% 38% 30% 30%');
+    smoothPart('neck',0,-89,0,17,21,20,skin,'42%');
+    [-1,1].forEach(side => {
+        smoothPart('leg',side*17,65,0,27,84,29,legColor,'48% 48% 43% 43%');
+        if(bottomType.style === 'shorts') smoothPart('calf',side*17,93,0,21,31,25,skin,'48%');
+        smoothPart('shoe',side*18,111,3,35,23,41,shoe,'48% 48% 40% 40%');
+        smoothPart('toe',side*18,109,22,25,10,8,accent,'50%');
+        smoothPart('sole',side*18,126,2,35,5,41,accent,'50%');
+        const armColor = topType.style === 'shirt' ? skin : top;
+        smoothPart('arm',side*43,-17,0,21,68,25,armColor,'48%');
+        if(topType.style === 'shirt') smoothPart('sleeve',side*43,-52,0,25,27,29,top,'45%');
+        smoothPart('hand',side*43,21,2,17,19,20,skin,'46% 46% 42% 42%');
+        [-5,-1.7,1.7,5].forEach((off,i)=>smoothPart('finger',side*43+off,31+(i===0||i===3?1:0),7,3.5,9,7,skin,'50%'));
+        smoothPart('thumb',side*51,23,7,5,10,8,skin,'50%');
+    });
+};
+drawAvatar();
