@@ -3105,3 +3105,40 @@ drawAvatar = function(){
  }
 };
 drawAvatar();
+
+
+// Natural hair shapes: each curl is a rounded, shaded 3D volume attached to the head.
+options.hair[0].variants.push({name:'Curly',style:'curly',color:'#2C211C'});
+const drawAvatarWithNaturalHair=drawAvatar;
+drawAvatar=function(){
+ drawAvatarWithNaturalHair();
+ const hairType=options.hair[selected.hair.type];
+ const hairStyle=hairType.style;
+ if(!['messy','fluffy','curly'].includes(hairStyle))return;
+ const model=avatar.querySelector('.rbx-model');
+ if(!model)return;
+ model.querySelectorAll('.rbx-hair-cap,.rbx-hair-fringe,.rbx-hair-lock,.rbx-hair-tuft').forEach(part=>part.remove());
+ const color=hairType.variants[selected.hair.variant].color;
+ const curls=[];
+ const addCurl=(x,y,z,size,tone)=>curls.push('<i class="rbx-curl" style="--curl-size:'+size+'px;--curl-x:'+x+'px;--curl-y:'+y+'px;--curl-z:'+z+'px;--curl-color:'+tone+'"></i>');
+ const loose=hairStyle==='fluffy';
+ [[-27,-169,-8],[-9,-176,0],[10,-176,0],[28,-168,-7],[-19,-163,17],[0,-169,20],[19,-163,17],[-28,-153,26],[-12,-155,30],[7,-155,30],[25,-151,25],[-32,-137,8],[32,-137,8],[-32,-121,3],[32,-121,3]].forEach(([x,y,z],i)=>addCurl(x,y,z,loose?(i%3===0?23:20):(i%4===0?19:17),i%3===0?shadeColor(color,18):i%3===1?color:shadeColor(color,-12)));
+ model.insertAdjacentHTML('beforeend',curls.join(''));
+};
+drawAvatar();
+
+
+// Keep the current silhouette clean and prevent accumulated tilt from crossing upside down.
+const drawAvatarWithCleanJoins=drawAvatar;
+drawAvatar=function(){
+ drawAvatarWithCleanJoins();
+ const model=avatar.querySelector('.rbx-model');
+ if(!model)return;
+ model.querySelectorAll('.rbx-shirt-mark,.rbx-pocket').forEach(part=>part.remove());
+ model.addEventListener('pointermove',()=>{
+  const rawPitch=parseFloat(model.style.getPropertyValue('--pitch'))||0;
+  avatarPitch=Math.max(-55,Math.min(55,rawPitch));
+  model.style.setProperty('--pitch',avatarPitch+'deg');
+ });
+};
+drawAvatar();
