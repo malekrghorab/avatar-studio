@@ -456,3 +456,15 @@ header{background:#fff;border-bottom-color:#e6ebf2}header h1{letter-spacing:-.8p
 
 /* Keep the 3D scene anchored to the full avatar viewport. */
 #avatar{position:relative;display:block;min-width:0;width:100%}.rbx-stage{position:absolute;inset:0;width:auto;height:auto;min-height:100%}
+
+
+/* Final 3D stage and interaction refinements */
+#avatar{position:relative;display:block;min-width:0;width:100%;}
+.rbx-stage{position:absolute;inset:0;width:auto;height:auto;min-height:100%;overflow:visible;perspective:1000px;perspective-origin:50% 48%;}
+.rbx-model{transform:translate3d(-50%,-45%,0) rotateX(var(--pitch,-5deg)) rotateY(var(--rotation,-12deg));transform-style:preserve-3d;cursor:grab;touch-action:none;will-change:transform;}
+.rbx-model:active{cursor:grabbing;}
+.rbx-platform,.rbx-ground{display:none!important;}
+.rbx-face-decal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translate3d(0,-132px,30.7px);z-index:3;pointer-events:none;}
+.rbx-hint{user-select:none;}
+.rbx-face{backface-visibility:hidden;}
+.rbx-part{transform-style:preserve-3d;}
