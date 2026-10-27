@@ -3380,3 +3380,24 @@ drawAvatar = function () {
     });
 };
 drawAvatar();
+
+                        // Keep the original blocky avatar as the only body style.
+activeBodyShape = 'blocky';
+localStorage.setItem('avatarBodyShape', 'blocky');
+if (typeof shapeControl !== 'undefined') shapeControl.remove();
+const renderBlockyTypeMenu = renderTypeMenu;
+renderTypeMenu = function(category) {
+    renderBlockyTypeMenu(category);
+    itemsContainer.querySelectorAll('.item-button span').forEach(label => {
+        label.textContent = label.textContent.replace(/ · (Blocky|Humanoid) fit/g, '');
+    });
+};
+const renderBlockyVariantMenu = renderVariantMenu;
+renderVariantMenu = function(category) {
+    renderBlockyVariantMenu(category);
+    itemsContainer.querySelectorAll('.item-button span').forEach(label => {
+        label.textContent = label.textContent.replace(/ · (Blocky|Humanoid) fit/g, '');
+    });
+};
+renderTypeMenu(currentCategory);
+drawAvatar();
