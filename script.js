@@ -3326,3 +3326,57 @@ drawAvatar = function () {
     });
 };
 drawAvatar();
+
+                        // Real 3D humanoid pass: each body part is an overlapping stack of shaded cross-sections.
+const drawAvatarWithLayeredVolumes = drawAvatar;
+drawAvatar = function () {
+    drawAvatarWithLayeredVolumes();
+    if (activeBodyShape !== 'humanoid') return;
+    const model = avatar.querySelector('.rbx-model');
+    if (!model) return;
+    model.querySelectorAll('.rbx-organic-volume, .rbx-headpart').forEach(part => part.remove());
+    const skin = options.body[selected.body.type].variants[selected.body.variant].color;
+    const topType = options.tops[selected.tops.type], top = topType.variants[selected.tops.variant].color;
+    const bottomType = options.bottoms[selected.bottoms.type], bottom = bottomType.variants[selected.bottoms.variant];
+    const shoeVariant = options.shoes[selected.shoes.type].variants[selected.shoes.variant];
+    const shoe = shoeVariant.color, sole = shoeVariant.accent || shadeColor(shoe, 24);
+    const head = options.face[selected.face.type].variants[selected.face.variant].shape === 'wide' ? 72 : 64;
+    const buildVolume = (name,x,y,z,w,h,d,color,roundness) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'rbx-organic-volume rbx-organic-' + name;
+        Object.assign(wrap.style,{position:'absolute',left:'50%',top:'50%',width:'0',height:'0',transform:'translate3d('+x+'px,'+y+'px,'+z+'px)',transformStyle:'preserve-3d'});
+        const slices=56;
+        for(let i=0;i<slices;i++){
+            const t=(i/(slices-1))*2-1;
+            const profile=Math.sqrt(Math.max(0.001,1-t*t));
+            const el=document.createElement('i');
+            el.className='rbx-volume-surface';
+            const layerColor=shadeColor(color,Math.round(-9*t));
+            Object.assign(el.style,{position:'absolute',left:'0',top:'0',width:Math.max(1,w*profile)+'px',height:Math.max(1,h*profile)+'px',border:'0',borderRadius:roundness||'50%',transform:'translate3d(-50%,-50%,'+(t*d/2)+'px)',background:'radial-gradient(ellipse at 32% 25%,'+shadeColor(layerColor,34)+' 0%,'+layerColor+' 58%,'+shadeColor(layerColor,-27)+' 100%)',boxShadow:'none',pointerEvents:'none'});
+            wrap.appendChild(el);
+        }
+        return wrap;
+    };
+    const add=(...args)=>model.appendChild(buildVolume(...args));
+    const pants=bottom.color||skin, shorts=bottomType.style==='shorts';
+    // Head, neck, shoulders, torso and hips overlap to form one connected silhouette.
+    const headVolume=buildVolume('headpart',0,-132,0,head,70,58,skin,'46% 46% 42% 42%');
+    const face=model.querySelector('.rbx-face-decal');
+    if(face) face.insertAdjacentElement('beforebegin',headVolume); else model.appendChild(headVolume);
+    add('neck',0,-92,0,19,25,22,skin,'42%');
+    add('torso',0,-40,0,62,84,38,top,'39% 39% 32% 32%');
+    add('hips',0,14,0,58,31,36,pants,'45% 45% 40% 40%');
+    if(shorts) add('shorts',0,26,0,61,32,38,pants,'35% 35% 25% 25%');
+    const armColor=topType.style==='shirt'?skin:top;
+    [-1,1].forEach(side=>{
+        add('arm',side*43,-17,0,21,67,27,armColor,'48%');
+        if(topType.style==='shirt') add('sleeve',side*43,-51,0,23,19,29,top,'47%');
+        add('hand',side*43,22,2,17,19,20,skin,'46% 46% 42% 42%');
+        [-5,-1.7,1.7,5].forEach((offset,i)=>add('finger',side*43+offset,32+(i===0||i===3?1:0),7,3.5,9,7,skin,'50%'));
+        add('thumb',side*51,24,7,5,10,8,skin,'50%');
+        add('leg',side*16,65,0,27,83,31,shorts?skin:pants,'48% 48% 43% 43%');
+        add('shoe',side*17,111,2,35,23,43,shoe,'48% 48% 40% 40%');
+        add('sole',side*17,125,2,35,5,43,sole,'50%');
+    });
+};
+drawAvatar();
