@@ -3142,3 +3142,26 @@ drawAvatar=function(){
  });
 };
 drawAvatar();
+
+
+
+// Render textured curl volumes from the selected hairstyle variant.
+const drawAvatarWithSelectedHair = drawAvatar;
+drawAvatar = function () {
+    drawAvatarWithSelectedHair();
+    const hairType = options.hair[selected.hair.type];
+    const hairVariant = hairType.variants[selected.hair.variant];
+    if (!['messy', 'fluffy', 'curly'].includes(hairVariant.style)) return;
+    const model = avatar.querySelector('.rbx-model');
+    if (!model) return;
+    model.querySelectorAll('.rbx-hair-cap, .rbx-hair-fringe, .rbx-hair-lock, .rbx-hair-tuft').forEach(part => part.remove());
+    const curls = [];
+    const addCurl = (x, y, z, size, color) => curls.push('<i class="rbx-curl" style="--curl-size:' + size + 'px;--curl-x:' + x + 'px;--curl-y:' + y + 'px;--curl-z:' + z + 'px;--curl-color:' + color + '"></i>');
+    const fluffy = hairVariant.style === 'fluffy';
+    [[-27,-169,-8],[-9,-176,0],[10,-176,0],[28,-168,-7],[-19,-163,17],[0,-169,20],[19,-163,17],[-28,-153,26],[-12,-155,30],[7,-155,30],[25,-151,25],[-32,-137,8],[32,-137,8],[-32,-121,3],[32,-121,3]].forEach(([x,y,z],i) => {
+        const color = i % 3 === 0 ? shadeColor(hairVariant.color, 18) : i % 3 === 1 ? hairVariant.color : shadeColor(hairVariant.color, -12);
+        addCurl(x, y, z, fluffy ? (i % 3 === 0 ? 23 : 20) : (i % 4 === 0 ? 19 : 17), color);
+    });
+    model.insertAdjacentHTML('beforeend', curls.join(''));
+};
+drawAvatar();
