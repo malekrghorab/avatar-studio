@@ -29,15 +29,17 @@
             <button class="category-button" data-category="shoes">Shoes</button>
             <button class="category-button" data-category="accessories">Accessories</button>
         </section>
-        <section class="avatar-area"><div id="avatar"><!-- Avatar will be built here --></div></section>
+        <section class="avatar-area"><div id="avatar"></div></section>
         <section class="items-area">
             <h2 id="category-title">Body</h2>
-            <div id="items"><!-- Items will appear here --></div>
+            <div id="items"></div>
         </section>
     </main>
-    <script src="script.js?v=9f61767"></script>
-</body>
-</html>
-
+    <script src="script.js?v=8953f0f"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
+        }
+    </script>
 </body>
 </html>
