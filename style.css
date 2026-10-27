@@ -429,3 +429,26 @@ main {
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+/* Block avatar studio */
+body{background:radial-gradient(ellipse at 52% 44%,#f8fbff 0,#e8f0fb 46%,#dce7f5 100%)}
+:root{--accent:#4468e8;--accent-dark:#3153c8;--border:#dce4ef;--shadow:0 18px 50px rgba(31,53,91,.10)}
+header{background:#fff;border-bottom-color:#e6ebf2}header h1{letter-spacing:-.8px}
+.avatar-area{position:relative;overflow:hidden;min-height:650px;background:radial-gradient(ellipse at 50% 67%,#fff 0,#f5f8fd 47%,#e8eef8 100%);border:1px solid #fff;box-shadow:inset 0 1px #fff,0 16px 42px rgba(43,64,103,.08)}
+.avatar-area:before{content:"AVATAR STUDIO";position:absolute;top:26px;left:30px;font-size:10px;letter-spacing:.2em;font-weight:800;color:#a0acc1}
+#avatar{width:100%;height:100%;min-height:inherit;display:grid;place-items:center;perspective:1000px}
+.rbx-stage{width:100%;height:100%;min-height:650px;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden;perspective:950px;perspective-origin:50% 44%}
+.rbx-model{position:absolute;left:50%;top:50%;width:1px;height:1px;transform-style:preserve-3d;transform:translate3d(-50%,-45%,0) rotateX(-7deg) rotateY(var(--rotation));cursor:grab;touch-action:none}.rbx-model:active{cursor:grabbing}
+.rbx-part{position:absolute;left:0;top:0;width:var(--w);height:var(--h);transform-style:preserve-3d;transform:translate3d(calc(var(--x) - var(--w)/2),calc(var(--y) - var(--h)/2),var(--z))}
+.rbx-face{position:absolute;left:50%;top:50%;display:block;backface-visibility:hidden;border:1px solid rgba(20,30,46,.13);box-shadow:inset 0 1px rgba(255,255,255,.22)}
+.rbx-headpart .front{border-radius:9px 9px 5px 5px}.rbx-headpart .right,.rbx-headpart .left{border-radius:3px}
+.rbx-face-decal{position:absolute;width:58px;height:51px;left:50%;top:50%;transform:translate(-50%,-50%) translateZ(30.6px);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#32251f;font-family:Arial,sans-serif;font-weight:900;line-height:1;text-shadow:0 1px rgba(255,255,255,.2)}
+.rbx-eyes{font-size:18px;letter-spacing:-3px;transform:translateY(3px)}.rbx-mouth{font-size:19px;margin-top:4px;color:#8e5148}
+.rbx-hair-cap{position:absolute;left:50%;top:50%;width:72px;height:22px;transform:translate(-50%,-50%) translate3d(0,-161px,0) translateZ(2px);border-radius:9px 9px 2px 2px;background:linear-gradient(145deg,color-mix(in srgb,var(--hair),white 24%),var(--hair) 60%,color-mix(in srgb,var(--hair),black 24%));box-shadow:inset 0 2px rgba(255,255,255,.24),0 3px 6px #17203333}
+.rbx-hat{position:absolute;top:50%;left:50%;width:70px;height:17px;transform:translate(-50%,-50%) translate3d(0,-174px,0);border-radius:7px 7px 2px 2px;background:var(--hat);box-shadow:0 3px 6px #17203344}.rbx-hat:after{content:"";position:absolute;left:-8px;right:-8px;bottom:-4px;height:6px;border-radius:50%;background:inherit;filter:brightness(.8)}
+.rbx-glasses{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translate3d(0,-128px,31px);font:bold 17px Arial;color:#17202b;white-space:nowrap}.rbx-headphones{position:absolute;left:50%;top:50%;width:82px;height:61px;transform:translate(-50%,-50%) translate3d(0,-128px,0);border:5px solid #343b4a;border-bottom:0;border-radius:45px 45px 0 0}
+.rbx-ground{position:absolute;width:280px;height:160px;left:50%;top:69%;transform:translate(-50%,-50%) rotateX(72deg);border-radius:50%;background:radial-gradient(ellipse,#51678d32 0,#7889a319 42%,transparent 72%);filter:blur(7px)}
+.rbx-platform{position:absolute;left:50%;top:50%;width:134px;height:134px;transform:translate(-50%,-50%) translate3d(0,118px,-10px) rotateX(90deg);border-radius:50%;background:linear-gradient(145deg,#fff,#dce5f1);border:1px solid #fff;box-shadow:0 14px 30px #3e537429,inset 0 0 0 8px #edf2f8}
+.rbx-label{position:absolute;left:50%;top:calc(50% + 206px);transform:translateX(-50%);min-width:100px;padding:7px 13px;border-radius:20px;background:#fff;color:#5a6680;box-shadow:0 5px 15px #30476c19;text-align:center;font-size:10px;font-weight:800;letter-spacing:.12em;white-space:nowrap}.rbx-hint{position:absolute;bottom:24px;color:#9aa7bb;font-size:9px;font-weight:800;letter-spacing:.18em}
+.categories,.items-area{border-color:#e5eaf2;box-shadow:0 12px 34px rgba(31,53,91,.07)}.category-button.active{background:#eaf0ff;color:#365de0}
+@media(max-width:700px){.avatar-area,.rbx-stage{min-height:560px}.rbx-label{top:calc(50% + 200px)}}
