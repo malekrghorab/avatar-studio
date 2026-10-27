@@ -3027,3 +3027,66 @@ function drawAvatar(){
 nameInput.addEventListener('input',drawAvatar);
 saveButton.addEventListener('click',()=>{const skin=options.body[selected.body.type].variants[selected.body.variant].color, top=options.tops[selected.tops.type].variants[selected.tops.variant].color, bottom=options.bottoms[selected.bottoms.type].variants[selected.bottoms.variant].color, shoe=options.shoes[selected.shoes.type].variants[selected.shoes.variant].color;const svg='<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600" viewBox="0 0 240 300"><rect width="100%" height="100%" rx="24" fill="#edf3fc"/><ellipse cx="120" cy="264" rx="64" ry="13" fill="#62718a" opacity=".2"/><rect x="94" y="190" width="24" height="54" rx="3" fill="'+bottom+'"/><rect x="122" y="190" width="24" height="54" rx="3" fill="'+bottom+'"/><rect x="90" y="238" width="32" height="18" rx="3" fill="'+shoe+'"/><rect x="118" y="238" width="32" height="18" rx="3" fill="'+shoe+'"/><rect x="78" y="105" width="84" height="84" rx="4" fill="'+top+'"/><rect x="53" y="108" width="23" height="72" rx="3" fill="'+skin+'"/><rect x="164" y="108" width="23" height="72" rx="3" fill="'+skin+'"/><rect x="107" y="82" width="27" height="28" fill="'+skin+'"/><rect x="84" y="35" width="72" height="68" rx="8" fill="'+skin+'"/><path d="M99 67h8m27 0h8" stroke="#33251f" stroke-width="5" stroke-linecap="round"/><path d="M109 83q11 9 22 0" fill="none" stroke="#8e5148" stroke-width="3" stroke-linecap="round"/><text x="120" y="286" text-anchor="middle" font-family="Arial" font-size="10" fill="#53627b">'+(nameInput.value||'MY AVATAR').replace(/[<&>]/g,'')+'</text></svg>';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));a.download=(nameInput.value.trim()||'my-avatar')+'.svg';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
 drawAvatar();
+
+// Full 3D avatar pass: connected limbs, raised garment pieces, and solid accessories.
+var avatarYaw=-12, avatarPitch=-5, avatarDragState=null;
+drawAvatar=function(){
+ const skin=options.body[selected.body.type].variants[selected.body.variant].color;
+ const hair=options.hair[selected.hair.type].variants[selected.hair.variant].color;
+ const topType=options.tops[selected.tops.type], top=topType.variants[selected.tops.variant].color;
+ const bottomType=options.bottoms[selected.bottoms.type], bottom=bottomType.variants[selected.bottoms.variant].color;
+ const shoeType=options.shoes[selected.shoes.type], shoes=shoeType.variants[selected.shoes.variant];
+ const accessory=options.accessories[selected.accessories.type].variants[selected.accessories.variant];
+ const accessoryStyle=options.accessories[selected.accessories.type].style;
+ const eyeStyle=options.eyes[selected.eyes.type].variants[selected.eyes.variant].style;
+ const mouthStyle=options.mouth[selected.mouth.type].variants[selected.mouth.variant].style;
+ const faceShape=options.face[selected.face.type].variants[selected.face.variant].shape;
+ const headWidth=faceShape==='wide'?74:faceShape==='soft'?64:68;
+ const eyes=eyeStyle==='happy'?'⌒　⌒':eyeStyle==='sleepy'?'﹀　﹀':eyeStyle==='big'?'●　●':'•　•';
+ const mouth=mouthStyle==='neutral'?'—':mouthStyle==='open'?'ᴗ':mouthStyle==='small'?'﹀':'◡';
+ const blocks=[]; const box=(kind,x,y,z,w,h,d,color)=>blocks.push(rbxPart('rbx-'+kind,x,y,z,w,h,d,color));
+ const shorts=bottomType.style==='shorts', longSleeves=topType.style!=='shirt', boot=shoeType.style==='boots';
+ // Pants and hips overlap slightly at every joint so the silhouette has no gaps.
+ const legColor=shorts?skin:bottom;
+ box('leg',-18,65,0,32,86,36,legColor); box('leg',18,65,0,32,86,36,legColor);
+ box('hips',0,10,0,68,26,38,bottom);
+ if(shorts){box('shorts',0,26,0,68,35,40,bottom);box('calf',-18,93,0,30,30,34,skin);box('calf',18,93,0,30,30,34,skin)}
+ [-18,18].forEach(x=>{
+  box('shoe',x,boot?111:112,2,boot?36:37,boot?31:26,48,shoes.color);
+  box('sole',x,127,3,39,6,50,shoes.accent||shadeColor(shoes.color,26));
+  if(boot)box('boot-cuff',x,99,1,37,5,38,shoes.accent||shadeColor(shoes.color,24));
+  else box('toe',x,110,20,30,13,10,shoes.accent||'#E8EDF5');
+ });
+ // Shoulders overlap the torso and hands overlap sleeves/arms.
+ [-51,51].forEach(x=>{box('arm',x,-19,0,28,69,32,longSleeves?top:skin);if(!longSleeves)box('sleeve',x,-53,0,30,29,34,top);box('hand',x,20,0,25,20,29,skin)});
+ box('torso',0,-40,0,78,84,42,top);box('neck',0,-91,0,24,22,26,skin);box('head rbx-headpart',0,-132,0,headWidth,70,60,skin);
+ // Raised garment details change with shirt, hoodie, sweater, or jacket selection.
+ if(topType.style==='hoodie'){box('hood',0,-88,-23,42,25,13,shadeColor(top,-22));box('pocket',0,-23,22,34,17,3,shadeColor(top,-20));box('drawstring',-8,-52,22,2,17,2,shadeColor(top,-32));box('drawstring',8,-52,22,2,17,2,shadeColor(top,-32))}
+ else if(topType.style==='sweater'){box('sweater-band',0,-10,22,76,5,3,shadeColor(top,-22));box('sweater-cuff',-51,10,17,29,7,3,shadeColor(top,-22));box('sweater-cuff',51,10,17,29,7,3,shadeColor(top,-22))}
+ else if(topType.style==='jacket'){box('zipper',0,-40,22,3,76,3,shadeColor(top,48));box('lapel',-18,-64,22,17,18,3,shadeColor(top,24));box('lapel',18,-64,22,17,18,3,shadeColor(top,-24));box('pocket',-24,-18,22,18,15,3,shadeColor(top,-18))}
+ else box('shirt-mark',-23,-48,22,8,13,3,shadeColor(top,-32));
+ box('waistband',0,-1,19,66,5,3,shadeColor(bottom,20));
+ if(!shorts){box('pocket',-24,20,19,15,12,3,shadeColor(bottom,-18));box('pocket',24,20,19,15,12,3,shadeColor(bottom,-18));box('seam',0,57,18,2,69,2,shadeColor(bottom,-20))}
+ // Hair is built from raised locks; each hat and wearable is assembled from cuboids.
+ const hs=options.hair[selected.hair.type].style;
+ if(hs!=='bald'){box('hair-cap',0,-170,0,headWidth+4,17,62,hair);box('hair-fringe',0,-160,31,35,15,4,shadeColor(hair,-8));box('hair-lock',-29,-132,4,10,43,18,hair);box('hair-lock',29,-132,4,10,43,18,shadeColor(hair,-8));if(hs==='fluffy'||hs==='messy'){box('hair-tuft',-14,-178,1,20,9,20,shadeColor(hair,14));box('hair-tuft',12,-176,-1,18,10,18,hair)}}
+ const ac=accessory.color||'#4b5563';
+ if(accessoryStyle==='cap'){box('cap-crown',0,-174,0,70,17,62,ac);box('cap-brim',0,-162,22,76,5,25,shadeColor(ac,-16));box('cap-seam',0,-165,31,2,5,2,shadeColor(ac,30))}
+ else if(accessoryStyle==='beanie'){box('beanie',0,-170,0,72,25,64,ac);box('beanie-cuff',0,-157,1,72,7,65,shadeColor(ac,-18));box('beanie-top',0,-185,0,18,7,18,shadeColor(ac,16))}
+ else if(accessoryStyle==='glasses'){
+  [-15,15].forEach(x=>{box('glasses-lens',x,-132,32,19,15,3,shadeColor(ac,18));box('glasses-rim',x,-140,33,21,3,4,ac);box('glasses-rim',x,-124,33,21,3,4,ac);box('glasses-rim',x-10,-132,33,3,17,4,ac);box('glasses-rim',x+10,-132,33,3,17,4,ac)});
+  box('glasses-bridge',0,-132,34,12,3,4,ac);box('glasses-arm',-35,-132,18,4,4,28,ac);box('glasses-arm',35,-132,18,4,4,28,ac)
+ }else if(accessoryStyle==='headphones'){
+  [-1,1].forEach(side=>{box('headphone-cup',side*38,-128,0,12,30,31,ac);box('headphone-pad',side*38,-128,16,8,20,4,shadeColor(ac,-18))});
+  [-24,-12,0,12,24].forEach(x=>box('headphone-band',x,-164+Math.abs(x)*.22,-2,11,7,20,ac))
+ }
+ const decal='<div class="rbx-face-decal" style="width:'+(headWidth-10)+'px"><span class="rbx-eyes">'+eyes+'</span><span class="rbx-mouth">'+mouth+'</span></div>';
+ const label=(nameInput.value||'YOUR AVATAR').replace(/[<>]/g,'').slice(0,24);
+ avatar.innerHTML='<div class="rbx-stage"><div class="rbx-model" style="--rotation:'+avatarYaw+'deg;--pitch:'+avatarPitch+'deg">'+blocks.join('')+decal+'</div><div class="rbx-label">'+label+'</div><div class="rbx-hint">DRAG IN ANY DIRECTION</div></div>';
+ const model=avatar.querySelector('.rbx-model');
+ model.addEventListener('pointerdown',e=>{avatarDragState={x:e.clientX,y:e.clientY,yaw:avatarYaw,pitch:avatarPitch};model.setPointerCapture(e.pointerId);e.preventDefault()});
+ model.addEventListener('pointermove',e=>{if(!avatarDragState)return;avatarYaw=avatarDragState.yaw+(e.clientX-avatarDragState.x)*.72;avatarPitch=avatarDragState.pitch-(e.clientY-avatarDragState.y)*.72;model.style.setProperty('--rotation',avatarYaw+'deg');model.style.setProperty('--pitch',avatarPitch+'deg')});
+ model.addEventListener('pointerup',()=>avatarDragState=null);model.addEventListener('pointercancel',()=>avatarDragState=null);
+};
+nameInput.addEventListener('input',drawAvatar);
+drawAvatar();
