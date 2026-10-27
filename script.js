@@ -3090,3 +3090,18 @@ drawAvatar=function(){
 };
 nameInput.addEventListener('input',drawAvatar);
 drawAvatar();
+
+
+// Add a fully solid rear-facing cap brim and strap for the backward-cap option.
+const drawAvatarWithBackwardsCap = drawAvatar;
+drawAvatar = function(){
+ drawAvatarWithBackwardsCap();
+ if(options.accessories[selected.accessories.type].style==='backwardsCap'){
+  const model=avatar.querySelector('.rbx-model');
+  if(model){
+   const color=options.accessories[selected.accessories.type].variants[selected.accessories.variant].color||'#4b5563';
+   model.insertAdjacentHTML('beforeend',rbxPart('rbx-cap-crown',0,-174,0,70,17,62,color)+rbxPart('rbx-cap-brim',0,-162,-22,76,5,25,shadeColor(color,-16))+rbxPart('rbx-cap-strap',0,-163,-31,18,5,3,shadeColor(color,24)));
+  }
+ }
+};
+drawAvatar();
