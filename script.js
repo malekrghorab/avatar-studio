@@ -3208,3 +3208,14 @@ const renderAccessoryTypesForShape=renderTypeMenu; renderTypeMenu=function(categ
 const renderAccessoryVariantsForShape=renderVariantMenu; renderVariantMenu=function(category){renderAccessoryVariantsForShape(category);if(category!=='accessories')return;const type=options.accessories[selected.accessories.type];itemsContainer.querySelectorAll('.item-button').forEach((button,index)=>{if(index===0)return;const variant=type.variants[index-1];if(variant)button.querySelector('span').textContent=variant.name+' '+type.name+' · '+bodyShapeNames[activeBodyShape]+' fit';});};
 renderTypeMenu(currentCategory);
 drawAvatar();
+
+
+
+// Keep the chosen body mode and its matching cap version between visits.
+const savedBodyShape = localStorage.getItem('avatarBodyShape');
+if (savedBodyShape === 'blocky' || savedBodyShape === 'humanoid') { activeBodyShape = savedBodyShape; shapeControl.querySelectorAll('[data-body-shape]').forEach(button => button.classList.toggle('active', button.dataset.bodyShape === activeBodyShape)); }
+shapeControl.addEventListener('click', event => { const button = event.target.closest('[data-body-shape]'); if (button) localStorage.setItem('avatarBodyShape', button.dataset.bodyShape); });
+const renderCapFitChoices = renderCapStyleMenu;
+renderCapStyleMenu = function (category, capIndex) { renderCapFitChoices(category, capIndex); itemsContainer.querySelectorAll('.item-button:not(:first-child) span').forEach(label => { label.textContent += ' · ' + bodyShapeNames[activeBodyShape] + ' fit'; }); };
+renderTypeMenu(currentCategory);
+drawAvatar();
