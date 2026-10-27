@@ -3460,3 +3460,23 @@ drawAvatar = function () {
     if (wearable) model.insertAdjacentHTML("beforeend", wearable);
 };
 drawAvatar();
+
+
+
+// Remove the legacy round curl layer and keep the reversed cap aligned to the cube head.
+const drawAvatarWithoutLegacyCurls = drawAvatar;
+drawAvatar = function () {
+    drawAvatarWithoutLegacyCurls();
+    const model = avatar.querySelector(".rbx-model");
+    if (!model) return;
+    model.querySelectorAll(".rbx-curl").forEach(part => part.remove());
+    if (options.accessories[selected.accessories.type].style === "backwardsCap") {
+        const item = options.accessories[selected.accessories.type].variants[selected.accessories.variant];
+        const color = item.color || "#30343b";
+        model.insertAdjacentHTML("beforeend",
+            rbxPart("rbx-cap-crown", 0, -169, 0, 62, 15, 54, color) +
+            rbxPart("rbx-cap-brim", 0, -159, -27, 70, 5, 18, shadeColor(color, -20)) +
+            rbxPart("rbx-cap-strap", 0, -163, -29, 18, 5, 3, shadeColor(color, 24)));
+    }
+};
+drawAvatar();
