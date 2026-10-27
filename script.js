@@ -3165,3 +3165,46 @@ drawAvatar = function () {
     model.insertAdjacentHTML('beforeend', curls.join(''));
 };
 drawAvatar();
+
+
+
+// Shape-aware 3D body presets and separately remembered accessory fits.
+let activeBodyShape = 'blocky';
+const accessorySelectionByShape = { blocky: { ...selected.accessories }, humanoid: { ...selected.accessories } };
+const bodyShapeNames = { blocky: 'Blocky', humanoid: 'Humanoid' };
+options.accessories.forEach(type => type.variants.forEach(variant => { variant.bodyFits = { blocky: { label: 'Blocky fit', headWidth: 68 }, humanoid: { label: 'Humanoid fit', headWidth: 64 } }; }));
+const shapeControl = document.createElement('div');
+shapeControl.className = 'body-shape-control';
+shapeControl.innerHTML = '<span>Body shape</span><div class="body-shape-options"><button type="button" data-body-shape="blocky" class="active">Blocky</button><button type="button" data-body-shape="humanoid">Humanoid</button></div>';
+document.querySelector('.categories').appendChild(shapeControl);
+shapeControl.addEventListener('click', event => {
+    const button = event.target.closest('[data-body-shape]');
+    if (!button || button.dataset.bodyShape === activeBodyShape) return;
+    accessorySelectionByShape[activeBodyShape] = { ...selected.accessories };
+    activeBodyShape = button.dataset.bodyShape;
+    Object.assign(selected.accessories, accessorySelectionByShape[activeBodyShape]);
+    shapeControl.querySelectorAll('button').forEach(item => item.classList.toggle('active', item === button));
+    drawAvatar();
+    if (currentCategory === 'accessories') renderTypeMenu('accessories');
+});
+const drawAvatarWithBodyShape = drawAvatar;
+drawAvatar = function () {
+    accessorySelectionByShape[activeBodyShape] = { ...selected.accessories };
+    drawAvatarWithBodyShape();
+    const model = avatar.querySelector('.rbx-model');
+    if (!model) return;
+    model.classList.toggle('humanoid', activeBodyShape === 'humanoid');
+    model.dataset.bodyShape = activeBodyShape;
+    if (activeBodyShape !== 'humanoid') return;
+    const fit = (part, values) => { if (!part) return; Object.entries(values).forEach(([key,value]) => part.style.setProperty('--'+key,value+'px')); };
+    fit(model.querySelector('.rbx-torso'),{w:64,h:82,d:36,y:-40}); fit(model.querySelector('.rbx-hips'),{w:58,h:24,d:34,y:9}); fit(model.querySelector('.rbx-neck'),{w:19,h:20,d:21,y:-91}); fit(model.querySelector('.rbx-headpart'),{w:64,h:70,d:55,y:-132});
+    model.querySelectorAll('.rbx-leg').forEach((part,i)=>fit(part,{x:i===0?-16:16,w:28,h:84,d:31,y:64})); model.querySelectorAll('.rbx-arm').forEach((part,i)=>fit(part,{x:i===0?-43:43,w:21,h:69,d:25,y:-19})); model.querySelectorAll('.rbx-hand').forEach((part,i)=>fit(part,{x:i===0?-44:44,w:19,h:20,d:22,y:20})); model.querySelectorAll('.rbx-shoe').forEach((part,i)=>fit(part,{x:i===0?-16:16,w:34,h:25,d:43,y:111})); model.querySelectorAll('.rbx-sole').forEach((part,i)=>fit(part,{x:i===0?-16:16,w:35,h:5,d:45,y:125}));
+    const accessoryFit={ 'rbx-cap-crown':{w:66,h:22,d:56,y:-170},'rbx-cap-brim':{w:70,h:5,d:21,y:-158,z:20},'rbx-cap-seam':{y:-162,z:28},'rbx-cap-strap':{y:-160,z:-28},'rbx-beanie':{w:66,h:28,d:58,y:-169},'rbx-beanie-cuff':{w:66,h:7,d:59,y:-154},'rbx-beanie-top':{y:-184},'rbx-glasses-lens':{y:-132,z:29,w:18,h:14},'rbx-glasses-rim':{y:-139,z:30},'rbx-glasses-bridge':{y:-132,z:31},'rbx-glasses-arm':{z:16},'rbx-headphone-cup':{y:-128,w:12,h:28,d:28},'rbx-headphone-pad':{y:-128,z:15},'rbx-headphone-band':{y:-163} };
+    Object.entries(accessoryFit).forEach(([className,values])=>fit(model.querySelector('.'+className),values));
+    const skin=options.body[selected.body.type].variants[selected.body.variant].color;
+    model.querySelectorAll('.rbx-hand').forEach((hand,sideIndex)=>{const side=sideIndex===0?-1:1;const fingers=[];[-6,-2,2,6].forEach((offset,index)=>fingers.push(rbxPart('rbx-finger',side*44+offset,31+(index===0||index===3?2:0),7,4,11,8,skin)));fingers.push(rbxPart('rbx-thumb',side*54,22,8,6,12,9,skin));hand.insertAdjacentHTML('afterend',fingers.join(''));});
+};
+const renderAccessoryTypesForShape=renderTypeMenu; renderTypeMenu=function(category){renderAccessoryTypesForShape(category);if(category==='accessories')itemsContainer.querySelectorAll('.item-button:not(:first-child) span').forEach(label=>label.textContent+=' · '+bodyShapeNames[activeBodyShape]+' fit');};
+const renderAccessoryVariantsForShape=renderVariantMenu; renderVariantMenu=function(category){renderAccessoryVariantsForShape(category);if(category!=='accessories')return;const type=options.accessories[selected.accessories.type];itemsContainer.querySelectorAll('.item-button').forEach((button,index)=>{if(index===0)return;const variant=type.variants[index-1];if(variant)button.querySelector('span').textContent=variant.name+' '+type.name+' · '+bodyShapeNames[activeBodyShape]+' fit';});};
+renderTypeMenu(currentCategory);
+drawAvatar();
