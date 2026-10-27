@@ -452,3 +452,7 @@ header{background:#fff;border-bottom-color:#e6ebf2}header h1{letter-spacing:-.8p
 .rbx-label{position:absolute;left:50%;top:calc(50% + 206px);transform:translateX(-50%);min-width:100px;padding:7px 13px;border-radius:20px;background:#fff;color:#5a6680;box-shadow:0 5px 15px #30476c19;text-align:center;font-size:10px;font-weight:800;letter-spacing:.12em;white-space:nowrap}.rbx-hint{position:absolute;bottom:24px;color:#9aa7bb;font-size:9px;font-weight:800;letter-spacing:.18em}
 .categories,.items-area{border-color:#e5eaf2;box-shadow:0 12px 34px rgba(31,53,91,.07)}.category-button.active{background:#eaf0ff;color:#365de0}
 @media(max-width:700px){.avatar-area,.rbx-stage{min-height:560px}.rbx-label{top:calc(50% + 200px)}}
+
+
+/* Keep the 3D scene anchored to the full avatar viewport. */
+#avatar{position:relative;display:block;min-width:0;width:100%}.rbx-stage{position:absolute;inset:0;width:auto;height:auto;min-height:100%}
