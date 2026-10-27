@@ -3480,3 +3480,21 @@ drawAvatar = function () {
     }
 };
 drawAvatar();
+
+
+
+// Replace the straight forehead strip with a stepped fringe that follows the cube face.
+const drawAvatarWithSteppedFringe = drawAvatar;
+drawAvatar = function () {
+    drawAvatarWithSteppedFringe();
+    const model = avatar.querySelector(".rbx-model");
+    if (!model) return;
+    model.querySelectorAll(".rbx-hair-fringe").forEach(part => part.remove());
+    const hair = options.hair[selected.hair.type].variants[selected.hair.variant].color;
+    const shade = shadeColor(hair, -9);
+    model.insertAdjacentHTML("beforeend",
+        rbxPart("rbx-hair-fringe", -18, -151, 31, 18, 9, 4, hair) +
+        rbxPart("rbx-hair-fringe", -2, -154, 31, 17, 8, 4, shade) +
+        rbxPart("rbx-hair-fringe", 13, -150, 31, 15, 9, 4, hair));
+};
+drawAvatar();
